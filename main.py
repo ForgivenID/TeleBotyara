@@ -1,4 +1,5 @@
 import asyncio
+from time import sleep
 
 from misc import *
 from threading import Thread, Lock
@@ -27,12 +28,17 @@ class User:
                 self.history = pk.load(file)
 
     def send_message(self, text):
-        executor.start(dp, bot.send_message(self.id, text))
+        asyncio.create_task(bot.send_message(self.id, text))
+
+    def send_messages(self, *messages, **kwargs):
+        timed = kwargs['time_space'] if 'time_space' in kwargs else None
+        for msg in messages:
+            self.send_message(msg)
+            if timed:
+                sleep(timed)
 
     def disengaged(self):
-        self.send_message(PRE_DISENGAGED)
-        self.send_message(rn.choice(DISENGAGED_PROMPTS))
-        self.send_message(POST_DISENGAGE)
+        self.send_messages(PRE_DISENGAGED, rn.choice(DISENGAGED_PROMPTS), POST_DISENGAGE, time_space=0.2)
         self.engaged = None
 
     def disengage(self):
@@ -41,11 +47,8 @@ class User:
             self.send_message(STOP_SEARCH)
         if self.engaged is None:
             return
-        self.disengage()
         [user.disengaged() for user in users.values() if user.engaged == self.id]
-        self.send_message(PRE_DISENGAGE)
-        self.send_message(rn.choice(DISENGAGE_PROMPTS))
-        self.send_message(POST_DISENGAGE)
+        self.send_messages(PRE_DISENGAGE, rn.choice(DISENGAGE_PROMPTS), POST_DISENGAGE, time_space=0.2)
         self.engaged = None
 
     def search(self):
