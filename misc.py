@@ -1,4 +1,7 @@
-TOKEN = '5813118604:AAFWo067VZY6MdqXAp7ODBInmu1-3tnMRA4'
+import pickle as pk
+
+with open('token.pk', 'rb') as file:
+    TOKEN = pk.load(file)
 
 WELCOME = "Дарова чукча!\n" \
           "Так, у нас короче тут анонимный чат лучше чем у\n" \
